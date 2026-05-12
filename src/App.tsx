@@ -228,52 +228,86 @@ export default function App() {
   if (currentStep === totalSteps) {
     // RESULT STEP
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[rgba(220,38,38,0.12)] flex items-center justify-center mx-auto mb-6">
-            <CheckIcon className="w-8 h-8 text-[#ef4444]" />
+      <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-6 text-left">
+        <div className="max-w-md w-full">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-[rgba(220,38,38,0.1)] flex items-center justify-center">
+              <ShieldIcon className="w-6 h-6 text-[#ef4444]" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold tracking-tight">Auditoria Técnica Iniciada</h3>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 bg-[#4ade80] rounded-full animate-pulse"></span>
+                <span className="text-[10px] font-mono text-[#4ade80] uppercase tracking-wider">Agentes de IA em campo</span>
+              </div>
+            </div>
           </div>
           
-          <h3 className="text-xl font-bold mb-2">Diagnóstico Gerado!</h3>
-          <p className="text-sm text-[#a1a1aa] mb-6">Com base nas suas respostas, identificamos pontos críticos de atenção.</p>
-
-          <div className="mb-8 p-6 rounded-xl bg-[#0f0f0f] border border-[#2a2a32]">
-            <div className="text-xs text-[#71717a] mb-2 font-mono">Nível de Risco Estimado</div>
-            <div className="text-4xl font-bold font-mono mb-2" style={{ color: risk.color }}>
-              {risk.text}
-            </div>
-            <div className="h-3 bg-[#1f1f27] rounded-full overflow-hidden">
-              <div 
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: score + '%', background: risk.bg }}
-              />
-            </div>
-          </div>
-
-          <div className="p-5 rounded-xl bg-[#111113] border border-[#2a2a32] mb-6">
-            <p className="text-sm text-[#a1a1aa] mb-4">
-              Agende uma call de 15 minutos para ver a análise completa do seu caso e receber recomendações personalizadas.
+          <div className="space-y-6">
+            <p className="text-[15px] text-[#a1a1aa] leading-relaxed">
+              Como você autorizou, nossos agentes já iniciaram os testes de intrusão e mapeamento de perímetro no seu site. 
             </p>
-            <a 
-              href={`https://wa.me/5511910376040?text=${encodeURIComponent(
-                `Olá! Acabei de fazer o diagnóstico de segurança da Patolino.Security.\n\n` +
-                `📊 Meu nível de risco: ${risk.text}\n` +
-                `🏢 Empresa: ${formData.company}\n` +
-                `🌐 Site: ${formData.site_url || 'Não informado'}\n\n` +
-                `Gostaria de agendar uma call para ver os resultados e entender como melhorar nossa segurança.`
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl text-base font-bold text-white bg-[#25D366] hover:bg-[#20BA5A] transition-all"
-            >
-              <WhatsAppIcon className="w-5 h-5" />
-              Falar com Especialista no WhatsApp
-            </a>
-          </div>
 
-          <p className="text-xs text-[#52525b]">
-            Sem compromisso • Resposta em até 24h • 100% confidencial
-          </p>
+            <div className="p-6 rounded-2xl bg-[#0f0f0f] border border-[#2a2a32] relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-3 opacity-10">
+                <ShieldIcon className="w-20 h-20" />
+              </div>
+              
+              <div className="relative z-10">
+                <div className="text-[10px] font-mono text-[#71717a] uppercase tracking-widest mb-1">Status Preliminar</div>
+                <div className="text-2xl font-bold font-mono mb-4" style={{ color: risk.color }}>
+                  {risk.text.toUpperCase()} RISCO
+                </div>
+                
+                <div className="h-1 bg-[#1f1f27] rounded-full overflow-hidden mb-6">
+                  <div 
+                    className="h-full rounded-full transition-all duration-1000"
+                    style={{ width: score + '%', background: risk.bg }}
+                  />
+                </div>
+
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-3 text-[13px] text-[#d1d5db]">
+                    <div className="w-1 h-1 bg-[#ef4444] rounded-full"></div>
+                    <span>Identificando portas e serviços expostos...</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-[13px] text-[#d1d5db]">
+                    <div className="w-1 h-1 bg-[#ef4444] rounded-full"></div>
+                    <span>Mapeando vulnerabilidades de injeção...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-[15px] text-white font-medium leading-relaxed">
+                Nossa IA está processando os dados brutos agora. Chame no WhatsApp para agendarmos a call onde entrego seu <strong>relatório completo e auditoria de segurança</strong>.
+              </p>
+              
+              <a 
+                href={`https://wa.me/5511910376040?text=${encodeURIComponent(
+                  `Autorizei a auditoria técnica na Patolino.Security e o diagnóstico preliminar acusou risco ${risk.text.toUpperCase()}.\\n\\n` +
+                  `\ud83c\udfe2 Empresa: ${formData.company}\\n` +
+                  `\ud83c\udf10 Site: ${formData.site_url || 'Não informado'}\\n\\n` +
+                  `Quero agendar a call para receber o relatório completo e a auditoria de segurança que está sendo gerada.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl text-base font-bold text-white bg-[#25D366] hover:bg-[#20BA5A] transition-all shadow-[0_10px_30px_rgba(37,211,102,0.15)]"
+              >
+                <WhatsAppIcon className="w-5 h-5" />
+                Agendar Entrega do Relatório
+              </a>
+              
+              <div className="flex items-center justify-center gap-4 text-[10px] text-[#52525b] font-bold uppercase tracking-widest">
+                <span>Call de 15 Minutos</span>
+                <span className="w-1 h-1 bg-[#2a2a32] rounded-full"></span>
+                <span>Auditoria Técnica</span>
+                <span className="w-1 h-1 bg-[#2a2a32] rounded-full"></span>
+                <span>Plano de Mitigação</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
