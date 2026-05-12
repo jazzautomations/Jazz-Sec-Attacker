@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --patolino-primary: #f59e0b;
+  --patolino-dark: #0f0f0f;
+  --patolino-darker: #0a0a0a;
+}
+
+body {
+  background-color: var(--patolino-darker);
+  color: #f5f5f5;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.6); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
