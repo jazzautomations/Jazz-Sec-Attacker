@@ -497,7 +497,7 @@ export default function App() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 href={`https://wa.me/5511910376040?text=${encodeURIComponent(
-                  `Autorizei a auditoria técnica na Jazz Sec - Attack e o diagnóstico preliminar acusou risco ${risk.text}.\n\n` +
+                  `Autorizei a auditoria técnica na Jazz Sec - Attacker e o diagnóstico preliminar acusou risco ${risk.text}.\n\n` +
                   `Empresa: ${formData.company}\n` +
                   `Site: ${formData.site_url || 'Não informado'}\n\n` +
                   `Quero agendar a call para receber o relatório completo e a auditoria de segurança.`
@@ -755,7 +755,7 @@ export default function App() {
               <Shield className="w-5 h-5 text-white" />
             </motion.div>
             <span className="font-black text-lg tracking-tighter text-white">
-              Jazz Sec - Attack
+              Jazz Sec - Attacker
             </span>
           </motion.div>
           
@@ -1034,7 +1034,7 @@ export default function App() {
         <div className="max-w-[1280px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3">
             <Shield className="w-5 h-5 text-primary" />
-            <span className="font-black text-sm tracking-tighter text-white">Jazz Sec - Attack</span>
+            <span className="font-black text-sm tracking-tighter text-white">Jazz Sec - Attacker</span>
           </div>
           
           <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest text-center">
