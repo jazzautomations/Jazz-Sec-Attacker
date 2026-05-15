@@ -734,21 +734,21 @@ export default function App() {
   // ============================================================
   // RENDER LANDING PAGE
   // ============================================================
-  
+
   return (
     <div ref={containerRef} className="min-h-screen bg-background text-zinc-300 font-sans overflow-x-hidden">
       <div className="noise-overlay" />
       <div className="scanline" />
       <FloatingParticles />
-      
+
       {/* NAV */}
       <nav className="fixed top-0 w-full z-[100] glass-heavy">
         <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
-          <motion.div 
+          <motion.div
             whileHover={{ scale: 1.02 }}
             className="flex items-center gap-3 group cursor-pointer"
           >
-            <motion.div 
+            <motion.div
               whileHover={{ rotate: 10 }}
               className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-600 to-primary-500 flex items-center justify-center shadow-lg shadow-primary/30"
             >
@@ -758,7 +758,7 @@ export default function App() {
               Jazz Sec - Attacker
             </span>
           </motion.div>
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -773,45 +773,53 @@ export default function App() {
       {/* HERO */}
       <Section className="min-h-screen flex items-center pt-20" withGlow>
         <FloatingParticles />
-        
-        <motion.div 
+
+        <motion.div
           style={{ y: smoothHeroY, opacity: heroOpacity, scale: heroScale }}
-          className="text-center max-w-[900px] mx-auto"
+          className="text-center max-w-[960px] mx-auto"
         >
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass mb-8"
           >
-            <StatusDot color="warning" />
+            <StatusDot color="danger" />
             <span className="text-accent text-xs font-bold uppercase tracking-wider">
-              GRÁTIS COM IA · Oferta por tempo limitado — Vagas se encerrando
+              Agentes de IA varrendo domínios agora · Gratuito por tempo limitado
             </span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-8xl font-black leading-[0.9] tracking-tighter mb-8"
+            className="text-5xl sm:text-6xl md:text-7xl font-black leading-[0.95] tracking-tighter mb-6"
           >
-            <span className="text-white">HACKERS CUSTAM</span>
+            <span className="text-white">Existem dois tipos</span>
             <br />
-            <span className="text-gradient-fire text-glow-primary inline-block">
-              R$ 21,5 MILHÕES
-            </span>
+            <span className="text-white">de empresa.</span>
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-[640px] mx-auto mb-12"
+            transition={{ delay: 0.18 }}
+            className="text-2xl md:text-3xl font-bold tracking-tight mb-8"
           >
-            Auditoria completa de segurança com IA que mapeia cada brecha da sua empresa — antes que hackers a encontrem. <span className="text-white font-medium">Esse serviço custa R$ 15.000+ no mercado. Hoje, gratuito por tempo limitado.</span>
+            <span className="text-gradient-fire">As que foram invadidas.</span>
+            <span className="text-zinc-300"> E as que ainda não sabem que foram.</span>
           </motion.p>
 
-          <motion.div 
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="text-base md:text-lg text-zinc-400 leading-relaxed max-w-[680px] mx-auto mb-12"
+          >
+            Hoje, a IA colocou ataques automáticos ao alcance de qualquer pessoa. Enquanto você lê isso, agentes autônomos estão varrendo milhares de domínios por minuto — testando seu WordPress, suas APIs de pagamento, seus sistemas internos. <span className="text-white font-semibold">A questão não é "se". É "quando" — e se alguém vai te avisar antes que aconteça.</span>
+          </motion.p>
+
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -825,9 +833,9 @@ export default function App() {
             >
               GARANTIR MINHA VAGA GRATUITA <ArrowRight className="w-4 h-4" />
             </motion.button>
-            
-            <a href="#how" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-200 transition-colors p-4">
-              Metodologia <ChevronDown className="w-4 h-4" />
+
+            <a href="#ai-attacks" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-200 transition-colors p-4">
+              Como funciona <ChevronDown className="w-4 h-4" />
             </a>
           </motion.div>
         </motion.div>
@@ -838,12 +846,12 @@ export default function App() {
         <div className="max-w-[1280px] mx-auto px-6 py-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {[
-              { label: "Custo Médio p/ Empresa", value: "R$ 21.5M", icon: <BarChart3 /> },
-              { label: "Dias Sem Saber do Ataque", value: "197", icon: <Eye /> },
-              { label: "Fecham Após 1 Ataque", value: "60%", icon: <AlertCircle /> },
-              { label: "Começam com 1 E-mail", value: "91%", icon: <Bug /> }
+              { label: "Custo médio de um ataque a empresas", value: "R$ 21.5M", icon: <BarChart3 /> },
+              { label: "Dias sem saber que foi invadida", value: "207", icon: <Eye /> },
+              { label: "Fecham em até 6 meses após o ataque", value: "60%", icon: <AlertCircle /> },
+              { label: "Ataques começam com um único e-mail", value: "91%", icon: <Bug /> }
             ].map((stat, i) => (
-              <motion.div 
+              <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -866,44 +874,143 @@ export default function App() {
         </div>
       </div>
 
-      {/* RISK CARDS */}
-      <Section id="risk" withGlow>
-        <motion.div 
+      {/* AI ATTACKS SECTION */}
+      <Section id="ai-attacks" withGlow>
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
           <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
-            Riscos Reais
+            O Cenário Atual
+          </span>
+          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">
+            ELES USAM IA.<br />
+            <span className="text-gradient-fire">NÓS USAMOS A MESMA.</span>
+          </h2>
+          <p className="text-zinc-400 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+            Antigamente, um ataque precisava de hackers experientes trabalhando dias. Hoje, qualquer pessoa com acesso à internet usa agentes autônomos que testam milhares de combinações por minuto — automaticamente, 24 horas por dia, sem parar, sem dormir, sem custo.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-8 mb-16">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="glass-card p-8 rounded-3xl border border-red-500/10"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <Bug className="w-5 h-5 text-red-400" />
+              </div>
+              <span className="text-xs font-mono text-red-400 uppercase tracking-widest">O que os hackers fazem</span>
+            </div>
+            <ul className="space-y-4">
+              {[
+                "Agentes autônomos escaneiam domínios em loop, 24/7, sem intervenção humana",
+                "Testam plugins desatualizados de WordPress automaticamente em segundos",
+                "Tentam acessar painéis administrativos com listas de senhas vazadas",
+                "Mapeiam APIs de pagamento em busca de dados expostos sem criptografia",
+                "Identificam sistemas internos acessíveis pela internet sem VPN"
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-zinc-400">
+                  <span className="text-red-500 mt-0.5 flex-shrink-0">×</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="glass-card p-8 rounded-3xl border border-primary/20"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-xs font-mono text-primary uppercase tracking-widest">O que fazemos por você</span>
+            </div>
+            <ul className="space-y-4">
+              {[
+                "Executamos a mesma varredura que os atacantes — antes deles chegar",
+                "Identificamos cada plugin, dependência e ponto de entrada vulnerável",
+                "Testamos seus painéis, APIs e formulários com as mesmas técnicas usadas em ataques reais",
+                "Verificamos se dados sensíveis de clientes estão expostos sem você saber",
+                "Entregamos o relatório para o responsável técnico corrigir antes do ataque"
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                  <span className="text-primary mt-0.5 flex-shrink-0">✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(220, 38, 38, 0.4)" }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => { setCurrentStep(1); setShowQuiz(true); }}
+            className="btn btn-primary px-10 py-5 rounded-2xl text-sm shimmer"
+          >
+            QUERO VER MINHAS BRECHAS PRIMEIRO <ArrowRight className="w-4 h-4" />
+          </motion.button>
+        </motion.div>
+      </Section>
+
+      {/* WHAT'S EXPOSED */}
+      <Section id="exposed" className="bg-surface-2/30">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
+            Alvos Prioritários dos Ataques
           </span>
           <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-            O CUSTO DE NÃO AGIR HOJE
+            O QUE ESTÁ EXPOSTO<br />
+            <span className="text-gradient-fire">NA SUA EMPRESA AGORA</span>
           </h2>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6">
           {[
             {
-              title: "Até R$ 50 Milhões em Multas",
-              desc: "A LGPD prevê multas de até 2% do faturamento anual — sem teto. Um único vazamento pode consumir o lucro de anos.",
-              icon: <AlertCircle className="text-primary" />,
-              gradient: "from-primary-600/20 to-transparent"
+              title: "WordPress e sistemas PHP desatualizados",
+              desc: "Mais de 50% dos sites em WordPress têm plugins com vulnerabilidades conhecidas. Agentes automatizados testam cada uma delas em segundos. Um plugin desatualizado é uma porta aberta com placa de boas-vindas.",
+              icon: <Globe className="text-primary" />,
+              gradient: "from-primary-600/20 to-transparent",
+              tag: "Alto Risco"
             },
             {
-              title: "Seu Patrimônio em Jogo",
-              desc: "Sócios e diretores respondem pessoalmente por negligência em segurança. Bens pessoais, casa, investimentos — tudo pode ser acionado.",
+              title: "Sistemas de pagamento e APIs expostas",
+              desc: "APIs de pagamento mal configuradas ou sem autenticação adequada expõem dados de cartão dos seus clientes. Um vazamento aqui não é multa — é o fim do negócio. Dados de pagamento são os mais valiosos no mercado negro.",
               icon: <Lock className="text-accent" />,
-              gradient: "from-accent/20 to-transparent"
+              gradient: "from-accent/20 to-transparent",
+              tag: "Crítico"
             },
             {
-              title: "60% Fecham em 6 Meses",
-              desc: "Mais da metade das empresas atacadas não sobrevive 6 meses. Clientes somem. Contratos caem. Reputação não tem preço — mas tem custo.",
-              icon: <BarChart3 className="text-primary" />,
-              gradient: "from-primary-600/20 to-transparent"
+              title: "Sistemas internos acessíveis pela internet",
+              desc: "ERPs, CRMs, painéis administrativos, bancos de dados — muitos estão expostos à internet sem VPN, protegidos só por senha fraca ou padrão de fábrica. Para um agente de IA, encontrar e testar esses acessos leva menos de 1 minuto.",
+              icon: <Server className="text-primary" />,
+              gradient: "from-primary-600/20 to-transparent",
+              tag: "Urgente"
             }
           ].map((card, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -916,57 +1023,81 @@ export default function App() {
                 "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity",
                 card.gradient
               )} />
-              
+
               <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl glass-card mb-6 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  {card.icon}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="w-14 h-14 rounded-2xl glass-card flex items-center justify-center group-hover:scale-110 transition-transform">
+                    {card.icon}
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                    {card.tag}
+                  </span>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-4 tracking-tight">{card.title}</h3>
+                <h3 className="text-lg font-bold text-white mb-4 tracking-tight leading-snug">{card.title}</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">{card.desc}</p>
               </div>
             </motion.div>
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16 p-8 rounded-3xl border border-red-500/20 bg-red-500/5 text-center"
+        >
+          <p className="text-xl md:text-2xl font-bold text-white mb-2">
+            "Existem dois tipos de empresa:
+          </p>
+          <p className="text-xl md:text-2xl font-bold">
+            <span className="text-gradient-fire">as que foram invadidas,</span>
+            <span className="text-zinc-300"> e as que ainda não sabem que foram."</span>
+          </p>
+          <p className="text-zinc-500 text-sm mt-4">— John Chambers, ex-CEO da Cisco</p>
+        </motion.div>
       </Section>
 
       {/* METHODOLOGY */}
-      <Section id="how" className="bg-surface-2/30">
-        <motion.div 
+      <Section id="how" withGlow>
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="max-w-[640px] mb-20"
         >
           <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
-            Fluxo Operacional
+            Como Funciona
           </span>
           <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
-            COMO FUNCIONA A AUDITORIA GRATUITA
+            A AUDITORIA GRATUITA COM IA
           </h2>
+          <p className="text-zinc-400 mt-6 text-base leading-relaxed">
+            Usamos a mesma tecnologia que os atacantes — agentes autônomos de IA que mapeiam cada brecha. A diferença é que o relatório vai para o seu responsável técnico corrigir, não para um hacker explorar.
+          </p>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-12">
           {[
             {
               step: "01",
-              title: "Diagnóstico do Negócio",
-              desc: "5 perguntas que mapeiam os riscos específicos da sua empresa em menos de 2 minutos.",
+              title: "5 perguntas sobre o seu negócio",
+              desc: "Identificamos o perfil de risco da sua empresa em menos de 2 minutos. Tamanho, setor, exposição digital — cada detalhe muda o vetor de ataque.",
               icon: <Terminal />
             },
             {
               step: "02",
-              title: "IA Executa o Pentest",
-              desc: "11 agentes de IA simultâneos varrem seu perímetro digital — portas, injeções, acessos, dados expostos.",
+              title: "IA executa a mesma varredura que hackers usam",
+              desc: "Agentes autônomos testam seu domínio: WordPress, plugins, APIs, portas abertas, formulários, painéis de admin, dados expostos. A mesma metodologia de Red Team — no seu favor.",
               icon: <Cpu />
             },
             {
               step: "03",
-              title: "Relatório + Plano de Ação",
-              desc: "Você recebe um relatório técnico completo + call de 15 min para priorizar o que resolver primeiro.",
+              title: "Relatório vai pro responsável técnico corrigir",
+              desc: "Você recebe o diagnóstico completo com cada vulnerabilidade encontrada, o nível de risco e o que precisa ser corrigido — em linguagem que o seu time de TI entende e pode agir.",
               icon: <Activity />
             }
           ].map((item, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -977,7 +1108,7 @@ export default function App() {
               <div className="absolute -top-8 -left-4 text-7xl font-black text-white/[0.03] pointer-events-none group-hover:text-white/[0.06] transition-colors">
                 {item.step}
               </div>
-              
+
               <div className="relative z-10 pl-4 border-l-2 border-white/5 group-hover:border-primary/30 transition-colors">
                 <div className="w-10 h-10 rounded-xl bg-surface-3 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
                   {item.icon}
@@ -990,9 +1121,73 @@ export default function App() {
         </div>
       </Section>
 
+      {/* CONSEQUENCES */}
+      <Section className="bg-surface-2/30">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
+            O Custo de Esperar
+          </span>
+          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+            QUANDO ACONTECE,<br />
+            <span className="text-gradient-fire">É TARDE DEMAIS.</span>
+          </h2>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {[
+            {
+              title: "Multas LGPD sem teto",
+              desc: "Vazamento de dados de clientes aciona a LGPD automaticamente — multa de até 2% do faturamento anual. Para empresas com R$ 10M/ano, são até R$ 200K por incidente. Sem negociação.",
+              icon: <AlertCircle className="text-primary" />,
+              gradient: "from-primary-600/20 to-transparent"
+            },
+            {
+              title: "Responsabilidade pessoal dos sócios",
+              desc: "Negligência comprovada em segurança gera responsabilidade civil dos gestores. Seus bens pessoais respondem pela falha. Casa, investimentos, veículos — tudo pode ser acionado judicialmente.",
+              icon: <Lock className="text-accent" />,
+              gradient: "from-accent/20 to-transparent"
+            },
+            {
+              title: "60% fecham em até 6 meses",
+              desc: "Mais da metade das pequenas e médias empresas atacadas não sobrevive 6 meses. Clientes somem, contratos caem, a reputação não volta. Um ataque não é uma crise passageira — pode ser o fim.",
+              icon: <BarChart3 className="text-primary" />,
+              gradient: "from-primary-600/20 to-transparent"
+            }
+          ].map((card, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15 }}
+              whileHover={{ y: -8 }}
+              className="glass-card glass-card-hover p-8 rounded-3xl relative overflow-hidden group"
+            >
+              <div className={cn(
+                "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity",
+                card.gradient
+              )} />
+
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-2xl glass-card mb-6 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  {card.icon}
+                </div>
+                <h3 className="text-xl font-bold text-white mb-4 tracking-tight">{card.title}</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed">{card.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </Section>
+
       {/* FINAL CTA */}
       <Section className="text-center" withGlow>
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -1004,17 +1199,21 @@ export default function App() {
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary-600 to-primary-500 flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-primary/30"
             >
-              <Shield className="w-10 h-10 text-white" />
+              <Radar className="w-10 h-10 text-white" />
             </motion.div>
-            
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight">
-              ESSA OFERTA<br />SE ENCERRA EM BREVE.
+
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
+              OS HACKERS NÃO VÃO<br />ESPERAR VOCÊ SE PREPARAR.
             </h2>
-            
-            <p className="text-zinc-400 mb-10 max-w-md mx-auto">
-              Empresas pagam R$ 15.000 a R$ 25.000 por esse serviço. Enquanto essa oferta estiver ativa, você acessa gratuitamente com IA. Não deixe para quando já tiver acontecido.
+
+            <p className="text-zinc-400 mb-4 max-w-md mx-auto text-base leading-relaxed">
+              Esse serviço custa <span className="text-white font-bold">R$ 15.000 a R$ 25.000</span> no mercado. Enquanto a oferta estiver ativa, você acessa com IA, gratuitamente.
             </p>
-            
+
+            <p className="text-zinc-500 mb-10 max-w-md mx-auto text-sm leading-relaxed">
+              Você descobre onde está exposto. Seu responsável técnico recebe o relatório e corrige. Simples assim — antes que alguém de fora descubra primeiro.
+            </p>
+
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(220, 38, 38, 0.4)" }}
               whileTap={{ scale: 0.95 }}
@@ -1023,6 +1222,10 @@ export default function App() {
             >
               QUERO MINHA AUDITORIA GRATUITA <Shield className="w-4 h-4" />
             </motion.button>
+
+            <p className="text-zinc-600 text-xs mt-6 uppercase tracking-widest">
+              Vagas limitadas · Oferta por tempo limitado
+            </p>
           </div>
         </motion.div>
       </Section>
@@ -1034,11 +1237,11 @@ export default function App() {
             <Shield className="w-5 h-5 text-primary" />
             <span className="font-black text-sm tracking-tighter text-white">Jazz Sec - Attacker</span>
           </div>
-          
+
           <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest text-center">
-            © 2025 Segurança Cibernética Avançada
+            © 2025 Jazz Automations · Segurança Ofensiva com IA
           </p>
-          
+
           <div className="flex items-center gap-6">
             {[Monitor, Lock, Zap].map((Icon, i) => (
               <Icon key={i} className="w-4 h-4 text-zinc-700 hover:text-zinc-400 transition-colors cursor-pointer" />
