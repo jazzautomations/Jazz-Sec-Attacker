@@ -1,1254 +1,733 @@
-import { useState, useMemo, useRef } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion'
-import { 
-  Shield, 
-  Check, 
-  AlertCircle, 
-  MessageSquare, 
-  Zap, 
-  Lock, 
-  Globe, 
-  BarChart3,
-  Server,
-  ArrowRight,
-  ChevronDown,
-  Monitor,
-  Bug,
-  Eye,
-  Radar,
-  Terminal,
-  Activity,
-  Cpu,
-  Database,
-  Wifi
-} from 'lucide-react'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { useState, useEffect } from "react";
+import type { ReactNode, CSSProperties } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
-// ============================================================
-// UTILS
-// ============================================================
+// ════════════════════════════════════════════════════════════════
+// JAZZ SEC · ATTACKER — Auditoria ofensiva
+// Estética: cinematográfica · red team · terminal · sóbria
+// ════════════════════════════════════════════════════════════════
 
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+const WHATSAPP = "https://wa.me/5519998102792?text=Ol%C3%A1%2C+quero+solicitar+o+diagn%C3%B3stico+do+Jazz+Sec+Attacker.";
+const LANDING = "https://jazz-sec-landing.vercel.app";
+const DEFENDER = "https://jazz-sec-defender.vercel.app";
+
+// ── Tokens ─────────────────────────────────────────────────────
+const T = {
+  bg: "#07070a",
+  bg2: "#0c0c10",
+  fg: "#f5f4f0",
+  fg2: "rgba(245,244,240,0.62)",
+  fg3: "rgba(245,244,240,0.36)",
+  fg4: "rgba(245,244,240,0.16)",
+  line: "rgba(245,244,240,0.08)",
+  lineHi: "rgba(245,244,240,0.18)",
+  red: "#ff8a52",
+  redHi: "#ffb088",
+  redDim: "rgba(255,138,82,0.10)",
+  sans: "'Inter Tight','Inter',system-ui,sans-serif",
+  serif: "'Instrument Serif',Georgia,serif",
+  mono: "'JetBrains Mono',ui-monospace,monospace",
+};
+
+// ── Hooks ──────────────────────────────────────────────────────
+function useScrollY() {
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    const h = () => setY(window.scrollY);
+    window.addEventListener("scroll", h, { passive: true });
+    return () => window.removeEventListener("scroll", h);
+  }, []);
+  return y;
 }
 
-// ============================================================
-// TYPES
-// ============================================================
-
-type FormData = {
-  name: string
-  company: string
-  email: string
-  phone: string
-  site_url: string
-  authorize_test: boolean
+// ── Atoms ──────────────────────────────────────────────────────
+function Mono({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return <span style={{ fontFamily: T.mono, letterSpacing: "0.04em", ...style }}>{children}</span>;
 }
 
-type Answers = {
-  q1?: string
-  q2?: string
-  q3?: string
-  q4?: string
-  q5?: string
+function Serif({ children, style }: { children: ReactNode; style?: CSSProperties }) {
+  return <span style={{ fontFamily: T.serif, fontStyle: "italic", ...style }}>{children}</span>;
 }
 
-// ============================================================
-// CONSTANTS
-// ============================================================
-
-const SCORE_WEIGHTS: Record<string, Record<string, number>> = {
-  q1: { '1-10': 30, '11-50': 50, '51-200': 70, '200+': 90 },
-  q2: { 'sim': 100, 'nao-sei': 70, 'nao': 30 },
-  q3: { 'nenhuma': 100, 'basico': 70, 'interno': 50, 'consultoria': 20 },
-  q4: { 'ransomware': 80, 'vazamento': 70, 'phishing': 60, 'acesso': 75 },
-  q5: { 'sim': 50, 'aprovar': 60 }
-}
-
-const QUESTIONS = [
-  {
-    id: 'q1',
-    question: 'Quantos funcionários sua empresa tem?',
-    options: [
-      { value: '1-10', label: '1-10 funcionários' },
-      { value: '11-50', label: '11-50 funcionários' },
-      { value: '51-200', label: '51-200 funcionários' },
-      { value: '200+', label: 'Mais de 200 funcionários' }
-    ]
-  },
-  {
-    id: 'q2',
-    question: 'Você sabe se sua empresa já foi atacada por hackers?',
-    options: [
-      { value: 'sim', label: 'Sim, já fomos atacados' },
-      { value: 'nao-sei', label: 'Não sei, pode ter sido e não descobrimos' },
-      { value: 'nao', label: 'Não, nunca fomos atacados' }
-    ]
-  },
-  {
-    id: 'q3',
-    question: 'Sua empresa tem algum tipo de proteção de segurança?',
-    options: [
-      { value: 'nenhuma', label: 'Nenhuma proteção específica' },
-      { value: 'basico', label: 'Antivírus básico' },
-      { value: 'interno', label: 'Equipe interna de TI' },
-      { value: 'consultoria', label: 'Consultoria de segurança' }
-    ]
-  },
-  {
-    id: 'q4',
-    question: 'O que mais te preocupa em relação à segurança?',
-    options: [
-      { value: 'ransomware', label: 'Ransomware (sequestro de dados)' },
-      { value: 'vazamento', label: 'Vazamento de dados de clientes' },
-      { value: 'phishing', label: 'Phishing (e-mails falsos)' },
-      { value: 'acesso', label: 'Acesso não autorizado' }
-    ]
-  },
-  {
-    id: 'q5',
-    question: 'Você tem autoridade para decidir sobre segurança na empresa?',
-    options: [
-      { value: 'sim', label: 'Sim, eu decido' },
-      { value: 'aprovar', label: 'Preciso aprovar com outros' }
-    ]
-  }
-]
-
-// ============================================================
-// COMPONENTS
-// ============================================================
-
-// Floating Particles Background
-const FloatingParticles = () => {
-  const particles = useMemo(() => 
-    Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 3 + 1,
-      duration: Math.random() * 20 + 10,
-      delay: Math.random() * 5,
-      isAccent: Math.random() > 0.7
-    }))
-  , [])
-
+function Eyebrow({ children, color = T.fg3 }: { children: ReactNode; color?: string }) {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map(p => (
-        <motion.div
-          key={p.id}
-          className={cn(
-            "absolute rounded-full blur-sm",
-            p.isAccent ? "bg-accent" : "bg-primary"
-          )}
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-            opacity: 0.2
-          }}
-          animate={{
-            y: [0, -30, 30, 0],
-            x: [0, 15, -15, 0],
-            opacity: [0.1, 0.3, 0.1]
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
-// Radial Glow Component
-const RadialGlow = ({ 
-  className, 
-  color = "primary",
-  size = 400 
-}: { 
-  className?: string
-  color?: "primary" | "accent"
-  size?: number 
-}) => (
-  <motion.div
-    className={cn(
-      "absolute rounded-full pointer-events-none radial-glow",
-      color === "primary" ? "radial-glow-primary" : "radial-glow-accent",
-      className
-    )}
-    style={{ width: size, height: size }}
-    animate={{
-      scale: [1, 1.1, 1],
-      opacity: [0.12, 0.18, 0.12]
-    }}
-    transition={{
-      duration: 8,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }}
-  />
-)
-
-// Section Component
-const Section = ({ 
-  children, 
-  className, 
-  id,
-  withGlow = false 
-}: { 
-  children: React.ReactNode
-  className?: string
-  id?: string
-  withGlow?: boolean
-}) => (
-  <section 
-    id={id} 
-    className={cn("py-24 md:py-32 relative overflow-hidden", className)}
-  >
-    {withGlow && (
-      <>
-        <RadialGlow className="-top-40 -left-40" size={600} />
-        <RadialGlow color="accent" className="top-1/2 -right-40" size={500} />
-      </>
-    )}
-    <div className="max-w-[1280px] mx-auto px-6 relative z-10">
+    <div style={{
+      fontFamily: T.mono, fontSize: 11, letterSpacing: "0.22em",
+      textTransform: "uppercase", color,
+      display: "inline-flex", alignItems: "center", gap: 10,
+    }}>
+      <span style={{ width: 22, height: 1, background: color, opacity: 0.5 }} />
       {children}
     </div>
-  </section>
-)
-
-// WhatsApp Icon
-const WhatsAppIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={cn("w-5 h-5", className)}>
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.876 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.377l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.511-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.884 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.411z"/>
-  </svg>
-)
-
-// Animated Status Dot
-const StatusDot = ({ color = "success" }: { color?: "success" | "warning" | "danger" }) => {
-  const colors = {
-    success: "bg-emerald-400 shadow-emerald-400/50",
-    warning: "bg-amber-400 shadow-amber-400/50",
-    danger: "bg-red-400 shadow-red-400/50"
-  }
-  
-  return (
-    <span className={cn(
-      "w-2 h-2 rounded-full animate-pulse shadow-lg",
-      colors[color]
-    )} />
-  )
+  );
 }
 
-// ============================================================
-// MAIN APP
-// ============================================================
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0 },
+};
 
-export default function App() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [answers, setAnswers] = useState<Answers>({})
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    company: '',
-    email: '',
-    phone: '',
-    site_url: '',
-    authorize_test: false
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [score, setScore] = useState(0)
-  const [showQuiz, setShowQuiz] = useState(false)
-
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: containerRef })
-  
-  // Parallax transforms
-  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 150])
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0])
-  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95])
-  
-  // Smooth spring for parallax
-  const smoothHeroY = useSpring(heroY, { stiffness: 100, damping: 30 })
-
-  const totalSteps = QUESTIONS.length + 2
-
-  const calculateScore = (): number => {
-    let total = 0
-    for (const key in answers) {
-      if (SCORE_WEIGHTS[key] && SCORE_WEIGHTS[key][answers[key as keyof Answers] || '']) {
-        total += SCORE_WEIGHTS[key][answers[key as keyof Answers] || '']
-      }
-    }
-    return Math.min(100, Math.max(0, Math.round(total / 5)))
-  }
-
-  const handleAnswer = (questionId: string, value: string) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }))
-    setTimeout(() => {
-      const questionIndex = QUESTIONS.findIndex(q => q.id === questionId)
-      if (questionIndex < QUESTIONS.length - 1) {
-        setCurrentStep(questionIndex + 2)
-      } else {
-        setCurrentStep(QUESTIONS.length + 1)
-      }
-    }, 400)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    const finalScore = calculateScore()
-    
-    try {
-      const response = await fetch('https://felipes.zo.space/api/patolino-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          quiz_answers: answers,
-          quiz_score: finalScore,
-          authorize_test: formData.authorize_test
-        })
-      })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('HTTP Error:', response.status, errorText)
-        alert(`Erro HTTP ${response.status}: ${errorText}`)
-        return
-      }
-
-      const result = await response.json()
-      
-      if (result.success) {
-        setScore(finalScore)
-        setCurrentStep(totalSteps)
-      } else {
-        alert('Erro: ' + (result.error || 'Erro ao salvar'))
-      }
-    } catch (error) {
-      console.error('Network/Parse Error:', error)
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        alert('Erro de conexão. Verifique sua internet ou tente novamente.')
-      } else {
-        alert('Erro ao enviar: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
-      }
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const risk = useMemo(() => {
-    if (score >= 80) return { 
-      text: 'ALTO', 
-      color: '#ef4444', 
-      bg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-      badge: 'risk-badge-high' as const
-    }
-    if (score >= 50) return { 
-      text: 'MÉDIO', 
-      color: '#f59e0b', 
-      bg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-      badge: 'risk-badge-medium' as const
-    }
-    return { 
-      text: 'BAIXO', 
-      color: '#10b981', 
-      bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      badge: 'risk-badge-low' as const
-    }
-  }, [score])
-
-  // ============================================================
-  // RENDER RESULT
-  // ============================================================
-  
-  if (currentStep === totalSteps) {
-    return (
-      <div className="min-h-screen bg-background grid-bg-animated flex items-center justify-center p-6">
-        <div className="noise-overlay" />
-        <div className="scanline" />
-        <FloatingParticles />
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-lg w-full relative"
-        >
-          {/* Header Badge */}
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-center gap-3 mb-8"
-          >
-            <div className="px-4 py-2 rounded-full glass flex items-center gap-2">
-              <StatusDot color="success" />
-              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-[0.2em]">
-                Agentes de IA Ativos
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Main Card */}
-          <div className="border-animated p-8">
-            <div className="flex items-center gap-4 mb-6">
-              <motion.div 
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-500 flex items-center justify-center shadow-lg shadow-primary/30"
-              >
-                <Shield className="w-7 h-7 text-white" />
-              </motion.div>
-              <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">
-                  Auditoria Técnica Iniciada
-                </h2>
-                <p className="text-sm text-zinc-400">
-                  Mapeamento de perímetro em andamento
-                </p>
-              </div>
-            </div>
-
-            <p className="text-zinc-400 leading-relaxed mb-6">
-              Acesso autorizado com sucesso. Nossos agentes de IA já iniciaram a varredura 
-              de vulnerabilidades estruturais no seu domínio.
-            </p>
-
-            {/* Risk Badge */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mb-6"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono text-zinc-500 uppercase tracking-wider">
-                  Diagnóstico Preliminar
-                </span>
-                <span className={cn("risk-badge", risk.badge)}>
-                  {risk.text} RISCO
-                </span>
-              </div>
-              
-              <div className="h-2 bg-surface-3 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${score}%` }}
-                  transition={{ duration: 1.5, ease: "circOut", delay: 0.5 }}
-                  className="h-full rounded-full"
-                  style={{ background: risk.bg }}
-                />
-              </div>
-            </motion.div>
-
-            {/* Processing Status */}
-            <div className="space-y-3 mb-8">
-              {[
-                { icon: <Radar className="w-4 h-4" />, text: "Mapeando portas e serviços expostos", done: true },
-                { icon: <Bug className="w-4 h-4" />, text: "Identificando vetores de injeção", done: true },
-                { icon: <Database className="w-4 h-4" />, text: "Analisando estrutura de dados", done: false }
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.6 + i * 0.1 }}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-surface-2/50"
-                >
-                  <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center",
-                    item.done ? "bg-primary/10 text-primary" : "bg-accent/10 text-accent animate-pulse"
-                  )}>
-                    {item.icon}
-                  </div>
-                  <span className="text-sm text-zinc-300">{item.text}</span>
-                  {item.done && (
-                    <Check className="w-4 h-4 text-primary ml-auto" />
-                  )}
-                </motion.div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
-              className="space-y-4"
-            >
-              <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
-                <p className="text-sm text-white leading-relaxed">
-                  O processamento está em andamento. Agende sua call para receber o 
-                  <strong className="text-primary"> relatório consolidado</strong> e o 
-                  <strong className="text-primary"> plano de mitigação</strong>.
-                </p>
-              </div>
-
-              <motion.a
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                href={`https://wa.me/5511910376040?text=${encodeURIComponent(
-                  `Autorizei a auditoria técnica na Jazz Sec - Attacker e o diagnóstico preliminar acusou risco ${risk.text}.\n\n` +
-                  `Empresa: ${formData.company}\n` +
-                  `Site: ${formData.site_url || 'Não informado'}\n\n` +
-                  `Quero agendar a call para receber o relatório completo e a auditoria de segurança.`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-whatsapp w-full py-4 rounded-xl text-base shimmer"
-              >
-                <WhatsAppIcon />
-                Agendar Entrega do Relatório
-              </motion.a>
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
-    )
-  }
-
-  // ============================================================
-  // RENDER QUIZ
-  // ============================================================
-  
-  if (showQuiz) {
-    const currentQuestion = QUESTIONS[currentStep - 1]
-    const isFormStep = currentStep > QUESTIONS.length
-    const progress = Math.round((currentStep / (totalSteps - 1)) * 100)
-
-    return (
-      <div className="min-h-screen bg-background grid-bg-animated">
-        <div className="noise-overlay" />
-        <div className="scanline" />
-
-        {/* Progress Header */}
-        <div className="fixed top-0 left-0 right-0 z-50 glass-heavy">
-          <div className="max-w-2xl mx-auto p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">
-                  Análise em Progresso
-                </span>
-              </div>
-              <span className="text-xs font-mono text-primary">{progress}%</span>
-            </div>
-            <div className="progress-bar">
-              <motion.div 
-                className="progress-bar-fill bg-gradient-to-r from-primary-600 to-primary-400"
-                animate={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-2xl mx-auto p-6 pt-28">
-          <AnimatePresence mode="wait">
-            {isFormStep ? (
-              <motion.form 
-                key="form"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                onSubmit={handleSubmit} 
-                className="space-y-5"
-              >
-                <div className="text-center mb-10">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/30"
-                  >
-                    <Terminal className="w-8 h-8 text-white" />
-                  </motion.div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Finalizar Autorização</h2>
-                  <p className="text-zinc-400">Dados necessários para emissão do relatório técnico.</p>
-                </div>
-
-                {[
-                  { id: 'name', type: 'text', placeholder: 'Seu nome completo', icon: <Globe className="w-4 h-4" /> },
-                  { id: 'company', type: 'text', placeholder: 'Nome da Empresa', icon: <Server className="w-4 h-4" /> },
-                  { id: 'email', type: 'email', placeholder: 'E-mail Corporativo', icon: <Wifi className="w-4 h-4" /> },
-                  { id: 'phone', type: 'tel', placeholder: 'WhatsApp (com DDD)', icon: <MessageSquare className="w-4 h-4" /> },
-                  { id: 'site_url', type: 'url', placeholder: 'URL do Site (https://...)', icon: <Shield className="w-4 h-4" /> }
-                ].map((field, i) => (
-                  <motion.div 
-                    key={field.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="relative group"
-                  >
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-primary transition-colors z-10">
-                      {field.icon}
-                    </div>
-                    <input
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      required={field.id !== 'site_url'}
-                      value={formData[field.id as keyof FormData] as string}
-                      onChange={e => setFormData(prev => ({ ...prev, [field.id]: e.target.value }))}
-                      className="input-field"
-                    />
-                  </motion.div>
-                ))}
-
-                <motion.label 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="flex items-start gap-4 p-5 rounded-2xl glass-card cursor-pointer group hover:bg-surface-3/50 transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    required
-                    checked={formData.authorize_test}
-                    onChange={e => setFormData(prev => ({ ...prev, authorize_test: e.target.checked }))}
-                    className="mt-0.5 w-5 h-5 accent-primary rounded"
-                  />
-                  <span className="text-sm text-zinc-400 leading-relaxed group-hover:text-zinc-200 transition-colors">
-                    <strong className="text-white">Autorizo formalmente</strong> a realização de testes de intrusão 
-                    e varredura de segurança controlada no domínio informado.
-                  </span>
-                </motion.label>
-
-                <motion.button
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn btn-primary w-full py-4 rounded-xl text-base shimmer"
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center gap-2">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Activity className="w-5 h-5" />
-                      </motion.div>
-                      Iniciando Scan...
-                    </span>
-                  ) : (
-                    <>
-                      Autorizar e Gerar Auditoria <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </motion.button>
-
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(QUESTIONS.length)}
-                  className="w-full py-3 text-xs text-zinc-500 hover:text-white transition-colors uppercase tracking-widest font-bold"
-                >
-                  Voltar
-                </button>
-              </motion.form>
-            ) : (
-              <motion.div 
-                key={currentStep}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                className="space-y-6"
-              >
-                <div className="text-center mb-8">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-3 text-[10px] font-mono text-primary uppercase tracking-[0.2em] mb-6">
-                    <Cpu className="w-3 h-3" />
-                    Questão {currentStep}/{QUESTIONS.length}
-                  </span>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                    {currentQuestion.question}
-                  </h2>
-                </div>
-
-                <div className="space-y-3">
-                  {currentQuestion.options.map((option, i) => (
-                    <motion.button
-                      key={option.value}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                      onClick={() => handleAnswer(currentQuestion.id, option.value)}
-                      className={cn(
-                        "w-full p-5 rounded-2xl border text-left transition-all duration-300 group",
-                        answers[currentQuestion.id as keyof Answers] === option.value
-                          ? 'glass-card border-primary/50 shadow-lg shadow-primary/10'
-                          : 'glass-card border-transparent hover:border-white/10'
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-base text-zinc-200 group-hover:text-white transition-colors">
-                          {option.label}
-                        </span>
-                        <div className={cn(
-                          "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300",
-                          answers[currentQuestion.id as keyof Answers] === option.value
-                            ? "border-primary bg-primary shadow-lg shadow-primary/30"
-                            : "border-zinc-700 group-hover:border-zinc-500"
-                        )}>
-                          {answers[currentQuestion.id as keyof Answers] === option.value && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                            >
-                              <Check className="w-3 h-3 text-white" />
-                            </motion.div>
-                          )}
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-
-                {currentStep > 1 && (
-                  <button
-                    onClick={() => setCurrentStep(prev => prev - 1)}
-                    className="mt-8 text-xs text-zinc-500 hover:text-white transition-colors uppercase tracking-widest font-bold"
-                  >
-                    Voltar
-                  </button>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    )
-  }
-
-  // ============================================================
-  // RENDER LANDING PAGE
-  // ============================================================
-
+function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   return (
-    <div ref={containerRef} className="min-h-screen bg-background text-zinc-300 font-sans overflow-x-hidden">
-      <div className="noise-overlay" />
-      <div className="scanline" />
-      <FloatingParticles />
+    <motion.div
+      variants={fadeUp}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.9, delay, ease: [0.22, 0.61, 0.36, 1] }}
+    >{children}</motion.div>
+  );
+}
 
-      {/* NAV */}
-      <nav className="fixed top-0 w-full z-[100] glass-heavy">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="flex items-center gap-3 group cursor-pointer"
-          >
-            <motion.div
-              whileHover={{ rotate: 10 }}
-              className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-600 to-primary-500 flex items-center justify-center shadow-lg shadow-primary/30"
-            >
-              <Shield className="w-5 h-5 text-white" />
-            </motion.div>
-            <span className="font-black text-lg tracking-tighter text-white">
-              Jazz Sec - Attacker
-            </span>
-          </motion.div>
+// ── Background atmosférico ─────────────────────────────────────
+function Backdrop() {
+  const { scrollY } = useScroll();
+  const gridY = useTransform(scrollY, [0, 2000], [0, 200]);
+  const glow1Y = useTransform(scrollY, [0, 2000], [0, -120]);
+  return (
+    <>
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+        opacity: 0.32, mixBlendMode: "overlay",
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .14 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`,
+      }} />
+      <motion.div style={{
+        position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none",
+        backgroundImage: `linear-gradient(to right, ${T.line} 1px, transparent 1px), linear-gradient(to bottom, ${T.line} 1px, transparent 1px)`,
+        backgroundSize: "80px 80px",
+        maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%)",
+        y: gridY,
+      }} />
+      <motion.div style={{
+        position: "fixed", top: "-10vh", left: "50%", width: "120vw", height: "80vh",
+        zIndex: 0, pointerEvents: "none",
+        x: "-50%", y: glow1Y,
+        background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,138,82,0.10), transparent 70%)",
+      }} />
+    </>
+  );
+}
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { setCurrentStep(1); setShowQuiz(true); }}
-            className="btn btn-primary px-6 py-2.5 rounded-xl text-xs"
-          >
-            Auditar Grátis
-          </motion.button>
-        </div>
-      </nav>
-
-      {/* HERO */}
-      <Section className="min-h-screen flex items-center pt-20" withGlow>
-        <FloatingParticles />
-
-        <motion.div
-          style={{ y: smoothHeroY, opacity: heroOpacity, scale: heroScale }}
-          className="text-center max-w-[960px] mx-auto"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass mb-8"
-          >
-            <StatusDot color="danger" />
-            <span className="text-accent text-xs font-bold uppercase tracking-wider">
-              Agentes de IA varrendo domínios agora · Gratuito por tempo limitado
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-black leading-[0.95] tracking-tighter mb-6"
-          >
-            <span className="text-white">Existem dois tipos</span>
-            <br />
-            <span className="text-white">de empresa.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            className="text-2xl md:text-3xl font-bold tracking-tight mb-8"
-          >
-            <span className="text-gradient-fire">As que foram invadidas.</span>
-            <span className="text-zinc-300"> E as que ainda não sabem que foram.</span>
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="text-base md:text-lg text-zinc-400 leading-relaxed max-w-[680px] mx-auto mb-12"
-          >
-            Hoje, a IA colocou ataques automáticos ao alcance de qualquer pessoa. Enquanto você lê isso, agentes autônomos estão varrendo milhares de domínios por minuto — testando seu WordPress, suas APIs de pagamento, seus sistemas internos. <span className="text-white font-semibold">A questão não é "se". É "quando" — e se alguém vai te avisar antes que aconteça.</span>
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(220, 38, 38, 0.4)" }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => { setCurrentStep(1); setShowQuiz(true); }}
-              className="btn btn-primary px-10 py-5 rounded-2xl text-sm shimmer"
-            >
-              GARANTIR MINHA VAGA GRATUITA <ArrowRight className="w-4 h-4" />
-            </motion.button>
-
-            <a href="#ai-attacks" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-200 transition-colors p-4">
-              Como funciona <ChevronDown className="w-4 h-4" />
-            </a>
-          </motion.div>
-        </motion.div>
-      </Section>
-
-      {/* STATS */}
-      <div className="border-y border-white/5 glass-heavy relative z-10">
-        <div className="max-w-[1280px] mx-auto px-6 py-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {[
-              { label: "Custo médio de um ataque a empresas", value: "R$ 21.5M", icon: <BarChart3 /> },
-              { label: "Dias sem saber que foi invadida", value: "207", icon: <Eye /> },
-              { label: "Fecham em até 6 meses após o ataque", value: "60%", icon: <AlertCircle /> },
-              { label: "Ataques começam com um único e-mail", value: "91%", icon: <Bug /> }
-            ].map((stat, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center group"
-              >
-                <div className="w-12 h-12 rounded-2xl glass-card mx-auto mb-4 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  {stat.icon}
-                </div>
-                <div className="text-3xl md:text-5xl font-black mb-2 tracking-tighter text-gradient-primary">
-                  {stat.value}
-                </div>
-                <div className="text-xs font-bold uppercase tracking-widest text-zinc-500 leading-tight">
-                  {stat.label}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+// ── Nav ────────────────────────────────────────────────────────
+function Nav({ y }: { y: number }) {
+  const scrolled = y > 40;
+  return (
+    <header style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+      padding: "20px 32px",
+      borderBottom: `1px solid ${scrolled ? T.line : "transparent"}`,
+      background: scrolled ? "rgba(7,7,10,0.72)" : "transparent",
+      backdropFilter: scrolled ? "blur(18px) saturate(140%)" : "none",
+      WebkitBackdropFilter: scrolled ? "blur(18px) saturate(140%)" : "none",
+      transition: "all 320ms ease",
+    }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <a href={LANDING} style={{ textDecoration: "none", color: T.fg, display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{
+            width: 28, height: 28, borderRadius: 6,
+            border: `1px solid ${T.lineHi}`,
+            display: "grid", placeItems: "center",
+            fontFamily: T.mono, fontSize: 12, fontWeight: 700,
+            background: "rgba(245,244,240,0.04)",
+          }}>JS</span>
+          <span style={{ fontFamily: T.sans, fontWeight: 700, fontSize: 15 }}>Jazz Sec</span>
+          <span style={{ fontFamily: T.mono, fontSize: 10, color: T.red, letterSpacing: "0.18em", marginLeft: 6 }}>· ATTACKER</span>
+        </a>
+        <nav style={{ display: "flex", alignItems: "center", gap: 28 }}>
+          {[
+            { l: "Objetivo", h: "#objective" },
+            { l: "Escopo", h: "#scope" },
+            { l: "Metodologia", h: "#method" },
+            { l: "Output", h: "#output" },
+          ].map(i => (
+            <a key={i.l} href={i.h} style={{
+              fontFamily: T.sans, fontSize: 13, color: T.fg2, textDecoration: "none",
+            }}>{i.l}</a>
+          ))}
+          <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" style={{
+            fontFamily: T.sans, fontSize: 13, fontWeight: 600,
+            color: T.bg, background: T.red,
+            padding: "9px 18px", borderRadius: 999, textDecoration: "none",
+          }}>Solicitar diagnóstico →</a>
+        </nav>
       </div>
+    </header>
+  );
+}
 
-      {/* AI ATTACKS SECTION */}
-      <Section id="ai-attacks" withGlow>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
-            O Cenário Atual
-          </span>
-          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">
-            ELES USAM IA.<br />
-            <span className="text-gradient-fire">NÓS USAMOS A MESMA.</span>
-          </h2>
-          <p className="text-zinc-400 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
-            Antigamente, um ataque precisava de hackers experientes trabalhando dias. Hoje, qualquer pessoa com acesso à internet usa agentes autônomos que testam milhares de combinações por minuto — automaticamente, 24 horas por dia, sem parar, sem dormir, sem custo.
+// ── Hero ───────────────────────────────────────────────────────
+function Hero({ y }: { y: number }) {
+  return (
+    <section style={{
+      position: "relative", zIndex: 1,
+      minHeight: "100vh",
+      padding: "180px 32px 60px",
+      display: "flex", flexDirection: "column", justifyContent: "center",
+      maxWidth: 1280, margin: "0 auto",
+    }}>
+      <Reveal>
+        <Eyebrow color={T.red}>
+          <motion.span style={{
+            width: 6, height: 6, borderRadius: "50%", background: T.red,
+            boxShadow: `0 0 12px ${T.red}`,
+          }} animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.6, repeat: Infinity }} />
+          Red Team · Operação de varredura ativa
+        </Eyebrow>
+      </Reveal>
+      <Reveal delay={0.12}>
+        <h1 style={{
+          fontFamily: T.sans, fontWeight: 700,
+          fontSize: "clamp(56px, 11vw, 168px)",
+          lineHeight: 0.92, letterSpacing: "-0.045em",
+          color: T.fg, margin: "32px 0 0",
+          transform: `translateY(${-y * 0.05}px)`,
+        }}>
+          Vemos o que eles<br/>
+          veriam — <Serif style={{ color: T.red, fontWeight: 400 }}>antes que vejam.</Serif>
+        </h1>
+      </Reveal>
+      <Reveal delay={0.24}>
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 80, marginTop: 64, alignItems: "end" }}>
+          <p style={{
+            fontFamily: T.sans, fontSize: "clamp(15px, 1.4vw, 18px)",
+            color: T.fg2, lineHeight: 1.6, maxWidth: 560,
+          }}>
+            Mapeamos a superfície de ataque pública da sua operação usando a mesma metodologia
+            que adversários reais usam — recon automatizado, identificação de CVEs ativos,
+            credenciais expostas e configurações inseguras. Sem injeção, sem ruído, sem
+            impacto operacional. Você recebe o relatório priorizado por risco em até 24h.
           </p>
-        </motion.div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" style={{
+              fontFamily: T.sans, fontSize: 14, fontWeight: 600,
+              color: T.bg, background: T.red,
+              padding: "16px 24px", borderRadius: 999, textDecoration: "none",
+              display: "inline-flex", alignItems: "center", gap: 10, justifyContent: "center",
+            }}>Solicitar diagnóstico <span style={{ fontFamily: T.mono, fontSize: 11 }}>→</span></a>
+            <a href="#method" style={{
+              fontFamily: T.sans, fontSize: 14, fontWeight: 500,
+              color: T.fg, border: `1px solid ${T.lineHi}`,
+              padding: "15px 24px", borderRadius: 999,
+              textDecoration: "none", textAlign: "center",
+            }}>Ver metodologia</a>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
 
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="glass-card p-8 rounded-3xl border border-red-500/10"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <Bug className="w-5 h-5 text-red-400" />
-              </div>
-              <span className="text-xs font-mono text-red-400 uppercase tracking-widest">O que os hackers fazem</span>
+// ── Live scan feed (mock cinematográfico) ──────────────────────
+function ScanFeed() {
+  const lines = [
+    "› RECON · resolving DNS · 247 records",
+    "› ENUM · subdomain wordlist · 12,043 entries",
+    "› HTTP · 81 hosts responding · cataloguing",
+    "› TECH · Apache/2.4.41 · Nginx/1.18 · IIS/10",
+    "› CMS · WordPress 6.2.4 · plugins: woocommerce 7.4.1",
+    "› SCAN · 24 plugins · 11 active CVEs detected",
+    "› AUTH · /wp-admin · /api/v1/auth · /actuator",
+    "› JWT · none-alg · RS256→HS256 · jwk injection",
+    "› API · GraphQL exposed · introspection allowed",
+    "› STORAGE · S3 bucket discovered · ACL: public-read",
+    "› SECRET · .env exposed via .well-known/.env",
+    "› GIT · .git/HEAD accessible · branch leak",
+    "› CONFIG · CORS: * · headers missing CSP, HSTS",
+    "› CRED · 7 emails on breach dump · 2 reused",
+    "› REPORT · consolidating · severity matrix",
+    "› DELIVERY · WhatsApp · operator notified",
+  ];
+  return (
+    <section style={{
+      position: "relative", zIndex: 1,
+      borderTop: `1px solid ${T.line}`, borderBottom: `1px solid ${T.line}`,
+      background: "rgba(12,12,16,0.5)",
+      padding: "20px 0", overflow: "hidden",
+    }}>
+      <div style={{
+        display: "flex", gap: 0,
+        animation: "scanRoll 95s linear infinite",
+        width: "max-content",
+      }}>
+        {[...lines, ...lines, ...lines].map((it, i) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", gap: 14,
+            padding: "0 28px",
+            fontFamily: T.mono, fontSize: 12, color: T.fg2,
+            whiteSpace: "nowrap",
+          }}>
+            <span style={{ color: T.red }}>●</span>
+            {it}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── Section wrapper ────────────────────────────────────────────
+function Section({ id, n, label, title, sub, children }: {
+  id?: string; n: string; label: string; title: ReactNode; sub?: string; children: ReactNode;
+}) {
+  return (
+    <section id={id} style={{
+      position: "relative", zIndex: 1,
+      padding: "140px 32px", maxWidth: 1280, margin: "0 auto",
+    }}>
+      <Reveal>
+        <div style={{
+          display: "grid", gridTemplateColumns: "1fr 2fr", gap: 80,
+          paddingBottom: 64, borderBottom: `1px solid ${T.line}`, marginBottom: 64,
+          alignItems: "end",
+        }}>
+          <div>
+            <Mono style={{ fontSize: 11, color: T.fg3, letterSpacing: "0.22em" }}>ATO {n}</Mono>
+            <div style={{
+              fontFamily: T.mono, fontSize: 11, color: T.red,
+              letterSpacing: "0.22em", textTransform: "uppercase", marginTop: 12,
+            }}>{label}</div>
+          </div>
+          <div>
+            <h2 style={{
+              fontFamily: T.sans, fontWeight: 700,
+              fontSize: "clamp(34px, 5vw, 60px)",
+              lineHeight: 1.02, letterSpacing: "-0.035em",
+              color: T.fg, margin: 0,
+            }}>{title}</h2>
+            {sub && (
+              <p style={{
+                fontFamily: T.sans, fontSize: 16, color: T.fg2,
+                lineHeight: 1.6, marginTop: 24, maxWidth: 560,
+              }}>{sub}</p>
+            )}
+          </div>
+        </div>
+      </Reveal>
+      {children}
+    </section>
+  );
+}
+
+// ── ATO 01 · Objective ─────────────────────────────────────────
+function Objective() {
+  const items = [
+    { t: "Exposição inadvertida", d: "Painéis administrativos esquecidos, ambientes de staging públicos, dashboards sem auth — o tipo de coisa que ninguém lembra que existe até alguém encontrar." },
+    { t: "CVEs ativos não corrigidos", d: "Frameworks e plugins desatualizados rodando com vulnerabilidades públicas que têm exploit conhecido. WordPress, Spring Boot, Laravel, Next.js." },
+    { t: "Configurações inseguras", d: "CORS aberto, headers críticos ausentes (CSP, HSTS, X-Frame-Options), buckets S3 com ACL pública, .env e .git acessíveis via HTTP." },
+    { t: "Credenciais e segredos vazados", d: "Tokens em sourcemaps, API keys hardcoded em JS, emails da empresa em breach databases, padrões reutilizados em múltiplos serviços." },
+    { t: "Lógica exposta", d: "APIs sem rate limit, endpoints internos sem autorização (BOLA/BFLA), endpoints de webhook sem verificação de assinatura, GraphQL com introspection ligada." },
+    { t: "Infraestrutura cinza", d: "Domínios e subdomínios esquecidos, takeover potencial (CNAME apontando para serviços expirados), DNS misconfigurations." },
+  ];
+  return (
+    <Section
+      id="objective"
+      n="01"
+      label="Objetivo"
+      title={<>O que <Serif style={{ color: T.red, fontWeight: 400 }}>de fato</Serif>{"\n"}procuramos.</>}
+      sub="Auditoria ofensiva não é varredura genérica de antivírus. Procuramos os vetores que adversários reais exploram para conseguir foothold inicial em uma operação."
+    >
+      <div style={{
+        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+        borderTop: `1px solid ${T.line}`,
+      }}>
+        {items.map((it, i) => (
+          <Reveal key={i} delay={i * 0.05}>
+            <div style={{
+              padding: "32px 28px",
+              borderRight: i % 3 !== 2 ? `1px solid ${T.line}` : "none",
+              borderBottom: `1px solid ${T.line}`,
+              minHeight: 200,
+            }}>
+              <Mono style={{ fontSize: 10, color: T.red, letterSpacing: "0.22em" }}>VECTOR · 0{i + 1}</Mono>
+              <h4 style={{
+                fontFamily: T.sans, fontWeight: 700, fontSize: 19,
+                color: T.fg, margin: "16px 0 12px", letterSpacing: "-0.015em",
+                lineHeight: 1.2,
+              }}>{it.t}</h4>
+              <p style={{ fontFamily: T.sans, fontSize: 13.5, color: T.fg2, lineHeight: 1.65 }}>{it.d}</p>
             </div>
-            <ul className="space-y-4">
-              {[
-                "Agentes autônomos escaneiam domínios em loop, 24/7, sem intervenção humana",
-                "Testam plugins desatualizados de WordPress automaticamente em segundos",
-                "Tentam acessar painéis administrativos com listas de senhas vazadas",
-                "Mapeiam APIs de pagamento em busca de dados expostos sem criptografia",
-                "Identificam sistemas internos acessíveis pela internet sem VPN"
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-zinc-400">
-                  <span className="text-red-500 mt-0.5 flex-shrink-0">×</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          </Reveal>
+        ))}
+      </div>
+    </Section>
+  );
+}
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="glass-card p-8 rounded-3xl border border-primary/20"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-primary" />
+// ── ATO 02 · Scope (superfície coberta) ────────────────────────
+function Scope() {
+  const blocks = [
+    { title: "Aplicação Web", tags: ["WordPress", "Spring Boot", "Django", "Laravel", "Next.js", "Express", "Rails", "FastAPI"] },
+    { title: "API & Serviços", tags: ["REST", "GraphQL", "gRPC", "WebSocket", "OAuth/OIDC", "SAML", "JWT", "Webhooks"] },
+    { title: "Infra & Cloud", tags: ["AWS S3", "GCP Storage", "Azure Blob", "Redis", "Kubernetes", "Docker", "Cloudflare", "CDN edge"] },
+    { title: "DevOps & Secrets", tags: [".env", ".git", "sourcemaps", "Actuator", "Swagger", "Robots.txt", "Sitemap", "Backup files"] },
+  ];
+  return (
+    <Section
+      id="scope"
+      n="02"
+      label="Escopo"
+      title={<>Superfície <Serif style={{ color: T.red, fontWeight: 400 }}>coberta.</Serif></>}
+      sub="A varredura cobre toda a stack que normalmente fica exposta publicamente — aplicação, APIs, infra e DevOps."
+    >
+      <div style={{
+        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: 1, background: T.line,
+        border: `1px solid ${T.line}`, borderRadius: 12, overflow: "hidden",
+      }}>
+        {blocks.map((b, i) => (
+          <Reveal key={b.title} delay={i * 0.06}>
+            <div style={{
+              background: T.bg, padding: "32px 28px",
+              minHeight: 220,
+            }}>
+              <Mono style={{ fontSize: 10, color: T.red, letterSpacing: "0.22em" }}>BLOCO · 0{i + 1}</Mono>
+              <h4 style={{
+                fontFamily: T.sans, fontWeight: 700, fontSize: 22,
+                color: T.fg, margin: "14px 0 22px", letterSpacing: "-0.02em",
+              }}>{b.title}</h4>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {b.tags.map(t => (
+                  <span key={t} style={{
+                    fontFamily: T.mono, fontSize: 11, color: T.fg2,
+                    padding: "5px 11px", border: `1px solid ${T.line}`,
+                    borderRadius: 999, letterSpacing: "0.04em",
+                  }}>{t}</span>
+                ))}
               </div>
-              <span className="text-xs font-mono text-primary uppercase tracking-widest">O que fazemos por você</span>
             </div>
-            <ul className="space-y-4">
+          </Reveal>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// ── ATO 03 · Methodology ───────────────────────────────────────
+function Methodology() {
+  const steps = [
+    {
+      n: "01", t: "Briefing & escopo",
+      d: "Você informa o domínio e o contexto operacional. Assinamos NDA. Escopo é definido em conjunto — sem zona cinzenta, sem surpresa.",
+      bullets: ["Domínio principal e subdomínios autorizados", "Janela de execução", "NDA assinado antes de qualquer dado técnico"],
+    },
+    {
+      n: "02", t: "Reconnaissance",
+      d: "Enumeração passiva de assets — DNS, certificados, BGP, third-party leaks. A varredura é externa; nada é tocado dentro do seu perímetro.",
+      bullets: ["Subdomain discovery (CT logs, DNS bruteforce, OSINT)", "Identificação de stack (fingerprinting passivo)", "Map de portas e serviços públicos"],
+    },
+    {
+      n: "03", t: "Enumeration & análise",
+      d: "Varredura ativa controlada sobre os assets identificados. Sem injeção, sem teste de carga, sem payload destrutivo — apenas verificação.",
+      bullets: ["Conferência de CVEs ativos por versão detectada", "Análise de headers, CORS, cookies, JWT", "Inspeção de .env, .git, sourcemaps, robots, sitemap"],
+    },
+    {
+      n: "04", t: "Triagem & priorização",
+      d: "Cada achado é validado, falso positivo é descartado e a lista é organizada por criticidade. Acompanha plano de correção por item.",
+      bullets: ["Classificação CVSS v4 / Crítico, Alto, Médio, Baixo", "Plano de correção priorizado", "Sumário executivo + relatório técnico"],
+    },
+    {
+      n: "05", t: "Apresentação",
+      d: "Em até 24h após o início, nossa equipe entra em contato via WhatsApp para agendar a reunião de apresentação dos resultados.",
+      bullets: ["Reunião de 45-60 min com o time técnico", "Sumário separado para liderança", "Q&A direto com quem fez a varredura"],
+    },
+  ];
+  return (
+    <Section
+      id="method"
+      n="03"
+      label="Metodologia"
+      title={<>Cinco passos.{"\n"}<Serif style={{ color: T.red, fontWeight: 400 }}>Vinte e quatro horas.</Serif></>}
+      sub="Processo 100% remoto. Sem instalar nada, sem liberar acesso a servidores, sem reunião antes do contrato. Você fala com a gente, assina o NDA, e a operação começa."
+    >
+      <div style={{ borderTop: `1px solid ${T.line}` }}>
+        {steps.map((s, i) => (
+          <Reveal key={s.n} delay={i * 0.06}>
+            <div style={{
+              display: "grid", gridTemplateColumns: "100px 1fr 1.6fr",
+              gap: 32, padding: "40px 0",
+              borderBottom: `1px solid ${T.line}`, alignItems: "start",
+            }}>
+              <Mono style={{ fontSize: 13, color: T.red, letterSpacing: "0.22em" }}>{s.n}</Mono>
+              <h4 style={{
+                fontFamily: T.sans, fontWeight: 700, fontSize: 22,
+                color: T.fg, letterSpacing: "-0.02em", margin: 0,
+              }}>{s.t}</h4>
+              <div>
+                <p style={{ fontFamily: T.sans, fontSize: 14.5, color: T.fg2, lineHeight: 1.65, marginBottom: 16 }}>{s.d}</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {s.bullets.map(b => (
+                    <li key={b} style={{
+                      display: "flex", gap: 12, alignItems: "flex-start",
+                      padding: "6px 0",
+                      fontFamily: T.mono, fontSize: 12, color: T.fg2,
+                    }}>
+                      <span style={{ color: T.red, marginTop: 2 }}>›</span>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+// ── ATO 04 · Output (preview de relatório) ─────────────────────
+function Output() {
+  return (
+    <Section
+      id="output"
+      n="04"
+      label="Output"
+      title={<>O relatório que você <Serif style={{ color: T.red, fontWeight: 400 }}>recebe.</Serif></>}
+      sub="Duas versões — uma técnica para o time de TI, uma executiva para a liderança. PDF, criptografado, entregue por canal direto. Trecho ilustrativo abaixo."
+    >
+      <Reveal>
+        <div style={{
+          border: `1px solid ${T.line}`, borderRadius: 16,
+          background: T.bg2,
+          fontFamily: T.mono, fontSize: 13, color: T.fg2,
+          overflow: "hidden",
+        }}>
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            padding: "14px 24px", borderBottom: `1px solid ${T.line}`,
+            fontFamily: T.mono, fontSize: 11, color: T.fg3, letterSpacing: "0.22em",
+          }}>
+            <span>JAZZ-SEC-RPT · 2026-Q2 · CONFIDENCIAL</span>
+            <span style={{ color: T.red }}>● 14 ACHADOS</span>
+          </div>
+          <div style={{ padding: "32px 36px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 32 }}>
               {[
-                "Executamos a mesma varredura que os atacantes — antes deles chegar",
-                "Identificamos cada plugin, dependência e ponto de entrada vulnerável",
-                "Testamos seus painéis, APIs e formulários com as mesmas técnicas usadas em ataques reais",
-                "Verificamos se dados sensíveis de clientes estão expostos sem você saber",
-                "Entregamos o relatório para o responsável técnico corrigir antes do ataque"
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-zinc-300">
-                  <span className="text-primary mt-0.5 flex-shrink-0">✓</span>
-                  {item}
-                </li>
+                { l: "CRÍTICO", v: "02", c: "#ff5a5a" },
+                { l: "ALTO", v: "04", c: T.red },
+                { l: "MÉDIO", v: "05", c: "#f5d56b" },
+                { l: "BAIXO", v: "03", c: "#a3a39a" },
+              ].map(it => (
+                <div key={it.l} style={{
+                  padding: "16px 18px", border: `1px solid ${T.line}`, borderRadius: 8,
+                  background: "rgba(245,244,240,0.02)",
+                }}>
+                  <div style={{ fontSize: 10, color: it.c, letterSpacing: "0.22em" }}>{it.l}</div>
+                  <div style={{
+                    fontFamily: T.sans, fontWeight: 700, fontSize: 32,
+                    color: T.fg, marginTop: 8, letterSpacing: "-0.03em",
+                  }}>{it.v}</div>
+                </div>
               ))}
-            </ul>
-          </motion.div>
+            </div>
+            <pre style={{
+              fontFamily: T.mono, fontSize: 12.5, color: T.fg2,
+              lineHeight: 1.7, whiteSpace: "pre-wrap", margin: 0,
+            }}>
+{`# JS-2026-Q2-001 [CRÍTICO]
+  Achado:    Server-Side Request Forgery (SSRF) via parâmetro 'url'
+  Endpoint:  POST /api/v1/integrations/fetch
+  Vetor:     Atacante pode forçar requisições internas a partir do servidor,
+             alcançando metadados da instância (IMDS) na AWS.
+  Impacto:   Comprometimento de credenciais IAM. Acesso total à conta cloud.
+  Prova:     Validamos resposta 200 com payload http://169.254.169.254/latest/meta-data
+  Correção:  Implementar lista de permissão (allowlist) de hosts no parâmetro 'url'.
+             Bloquear ranges privados (RFC 1918, link-local, IMDS).
+  Esforço:   2-4h dev · 1h QA
+
+# JS-2026-Q2-004 [ALTO]
+  Achado:    Credenciais expostas em arquivo .env público
+  URL:       https://staging.cliente.com.br/.env
+  Vetor:     Arquivo .env servido pelo webserver. Contém AWS_SECRET_KEY,
+             DATABASE_URL e JWT_SECRET em texto claro.
+  Correção:  Bloquear servimento de arquivos dotfiles no webserver. Rotacionar
+             todos os segredos expostos imediatamente.
+  Esforço:   30min ops + rotação de segredos`}
+            </pre>
+          </div>
         </div>
+      </Reveal>
+    </Section>
+  );
+}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(220, 38, 38, 0.4)" }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { setCurrentStep(1); setShowQuiz(true); }}
-            className="btn btn-primary px-10 py-5 rounded-2xl text-sm shimmer"
-          >
-            QUERO VER MINHAS BRECHAS PRIMEIRO <ArrowRight className="w-4 h-4" />
-          </motion.button>
-        </motion.div>
-      </Section>
-
-      {/* WHAT'S EXPOSED */}
-      <Section id="exposed" className="bg-surface-2/30">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
-            Alvos Prioritários dos Ataques
-          </span>
-          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-            O QUE ESTÁ EXPOSTO<br />
-            <span className="text-gradient-fire">NA SUA EMPRESA AGORA</span>
-          </h2>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              title: "WordPress e sistemas PHP desatualizados",
-              desc: "Mais de 50% dos sites em WordPress têm plugins com vulnerabilidades conhecidas. Agentes automatizados testam cada uma delas em segundos. Um plugin desatualizado é uma porta aberta com placa de boas-vindas.",
-              icon: <Globe className="text-primary" />,
-              gradient: "from-primary-600/20 to-transparent",
-              tag: "Alto Risco"
-            },
-            {
-              title: "Sistemas de pagamento e APIs expostas",
-              desc: "APIs de pagamento mal configuradas ou sem autenticação adequada expõem dados de cartão dos seus clientes. Um vazamento aqui não é multa — é o fim do negócio. Dados de pagamento são os mais valiosos no mercado negro.",
-              icon: <Lock className="text-accent" />,
-              gradient: "from-accent/20 to-transparent",
-              tag: "Crítico"
-            },
-            {
-              title: "Sistemas internos acessíveis pela internet",
-              desc: "ERPs, CRMs, painéis administrativos, bancos de dados — muitos estão expostos à internet sem VPN, protegidos só por senha fraca ou padrão de fábrica. Para um agente de IA, encontrar e testar esses acessos leva menos de 1 minuto.",
-              icon: <Server className="text-primary" />,
-              gradient: "from-primary-600/20 to-transparent",
-              tag: "Urgente"
-            }
-          ].map((card, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              whileHover={{ y: -8 }}
-              className="glass-card glass-card-hover p-8 rounded-3xl relative overflow-hidden group"
-            >
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity",
-                card.gradient
-              )} />
-
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-14 h-14 rounded-2xl glass-card flex items-center justify-center group-hover:scale-110 transition-transform">
-                    {card.icon}
-                  </div>
-                  <span className="text-[10px] font-mono font-bold text-primary uppercase tracking-widest px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-                    {card.tag}
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white mb-4 tracking-tight leading-snug">{card.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{card.desc}</p>
-              </div>
-            </motion.div>
+// ── ATO 05 · Custody ───────────────────────────────────────────
+function Custody() {
+  const items = [
+    { t: "Varredura não invasiva", d: "Atuamos sobre o que está exposto publicamente. Sem injeção, sem teste de carga, sem payload destrutivo." },
+    { t: "NDA antes do primeiro byte", d: "Confidencialidade contratual assinada antes de qualquer informação técnica ser trocada." },
+    { t: "Zero retenção pós-entrega", d: "Concluído o diagnóstico, os artefatos coletados são destruídos. Nada vai para training, nada é compartilhado." },
+    { t: "Conformidade LGPD por design", d: "Nenhum dado pessoal é coletado durante a varredura externa. Atuamos dentro do escopo autorizado." },
+  ];
+  return (
+    <Section
+      id="custody"
+      n="05"
+      label="Cadeia de Custódia"
+      title={<>Seu nome, suas brechas,{"\n"}<Serif style={{ color: T.red, fontWeight: 400 }}>seus arquivos.</Serif></>}
+      sub="A confiança vem antes do contrato. Estas são as regras de operação — explicadas antes, cumpridas durante, auditáveis depois."
+    >
+      <Reveal>
+        <div style={{
+          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          borderTop: `1px solid ${T.line}`,
+        }}>
+          {items.map((it, i) => (
+            <div key={i} style={{
+              padding: "36px 28px",
+              borderRight: i < items.length - 1 ? `1px solid ${T.line}` : "none",
+              borderBottom: `1px solid ${T.line}`,
+            }}>
+              <Mono style={{ fontSize: 10, color: T.red, letterSpacing: "0.22em" }}>0{i + 1} · CUSTÓDIA</Mono>
+              <h4 style={{
+                fontFamily: T.sans, fontWeight: 700, fontSize: 18,
+                color: T.fg, margin: "16px 0 12px", letterSpacing: "-0.015em",
+                lineHeight: 1.25,
+              }}>{it.t}</h4>
+              <p style={{ fontFamily: T.sans, fontSize: 13.5, color: T.fg2, lineHeight: 1.65, margin: 0 }}>{it.d}</p>
+            </div>
           ))}
         </div>
+      </Reveal>
+    </Section>
+  );
+}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 p-8 rounded-3xl border border-red-500/20 bg-red-500/5 text-center"
-        >
-          <p className="text-xl md:text-2xl font-bold text-white mb-2">
-            "Existem dois tipos de empresa:
-          </p>
-          <p className="text-xl md:text-2xl font-bold">
-            <span className="text-gradient-fire">as que foram invadidas,</span>
-            <span className="text-zinc-300"> e as que ainda não sabem que foram."</span>
-          </p>
-          <p className="text-zinc-500 text-sm mt-4">— John Chambers, ex-CEO da Cisco</p>
-        </motion.div>
-      </Section>
-
-      {/* METHODOLOGY */}
-      <Section id="how" withGlow>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-[640px] mb-20"
-        >
-          <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
-            Como Funciona
-          </span>
-          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
-            A AUDITORIA GRATUITA COM IA
-          </h2>
-          <p className="text-zinc-400 mt-6 text-base leading-relaxed">
-            Usamos a mesma tecnologia que os atacantes — agentes autônomos de IA que mapeiam cada brecha. A diferença é que o relatório vai para o seu responsável técnico corrigir, não para um hacker explorar.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-12">
-          {[
-            {
-              step: "01",
-              title: "5 perguntas sobre o seu negócio",
-              desc: "Identificamos o perfil de risco da sua empresa em menos de 2 minutos. Tamanho, setor, exposição digital — cada detalhe muda o vetor de ataque.",
-              icon: <Terminal />
-            },
-            {
-              step: "02",
-              title: "IA executa a mesma varredura que hackers usam",
-              desc: "Agentes autônomos testam seu domínio: WordPress, plugins, APIs, portas abertas, formulários, painéis de admin, dados expostos. A mesma metodologia de Red Team — no seu favor.",
-              icon: <Cpu />
-            },
-            {
-              step: "03",
-              title: "Relatório vai pro responsável técnico corrigir",
-              desc: "Você recebe o diagnóstico completo com cada vulnerabilidade encontrada, o nível de risco e o que precisa ser corrigido — em linguagem que o seu time de TI entende e pode agir.",
-              icon: <Activity />
-            }
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              className="relative group"
-            >
-              <div className="absolute -top-8 -left-4 text-7xl font-black text-white/[0.03] pointer-events-none group-hover:text-white/[0.06] transition-colors">
-                {item.step}
-              </div>
-
-              <div className="relative z-10 pl-4 border-l-2 border-white/5 group-hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-xl bg-surface-3 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                  {item.icon}
-                </div>
-                <h3 className="text-lg font-bold text-white mb-4">{item.title}</h3>
-                <p className="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </Section>
-
-      {/* CONSEQUENCES */}
-      <Section className="bg-surface-2/30">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="text-xs font-black text-primary uppercase tracking-[0.3em] mb-4 block">
-            O Custo de Esperar
-          </span>
-          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-            QUANDO ACONTECE,<br />
-            <span className="text-gradient-fire">É TARDE DEMAIS.</span>
-          </h2>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              title: "Multas LGPD sem teto",
-              desc: "Vazamento de dados de clientes aciona a LGPD automaticamente — multa de até 2% do faturamento anual. Para empresas com R$ 10M/ano, são até R$ 200K por incidente. Sem negociação.",
-              icon: <AlertCircle className="text-primary" />,
-              gradient: "from-primary-600/20 to-transparent"
-            },
-            {
-              title: "Responsabilidade pessoal dos sócios",
-              desc: "Negligência comprovada em segurança gera responsabilidade civil dos gestores. Seus bens pessoais respondem pela falha. Casa, investimentos, veículos — tudo pode ser acionado judicialmente.",
-              icon: <Lock className="text-accent" />,
-              gradient: "from-accent/20 to-transparent"
-            },
-            {
-              title: "60% fecham em até 6 meses",
-              desc: "Mais da metade das pequenas e médias empresas atacadas não sobrevive 6 meses. Clientes somem, contratos caem, a reputação não volta. Um ataque não é uma crise passageira — pode ser o fim.",
-              icon: <BarChart3 className="text-primary" />,
-              gradient: "from-primary-600/20 to-transparent"
-            }
-          ].map((card, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              whileHover={{ y: -8 }}
-              className="glass-card glass-card-hover p-8 rounded-3xl relative overflow-hidden group"
-            >
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity",
-                card.gradient
-              )} />
-
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl glass-card mb-6 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  {card.icon}
-                </div>
-                <h3 className="text-xl font-bold text-white mb-4 tracking-tight">{card.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{card.desc}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </Section>
-
-      {/* FINAL CTA */}
-      <Section className="text-center" withGlow>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="max-w-2xl mx-auto"
-        >
-          <div className="border-animated p-12 md:p-16">
-            <motion.div
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary-600 to-primary-500 flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-primary/30"
-            >
-              <Radar className="w-10 h-10 text-white" />
-            </motion.div>
-
-            <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
-              OS HACKERS NÃO VÃO<br />ESPERAR VOCÊ SE PREPARAR.
+// ── ATO 06 · Request (CTA) ─────────────────────────────────────
+function Request() {
+  return (
+    <section id="request" style={{
+      position: "relative", zIndex: 1,
+      padding: "120px 32px 160px",
+      maxWidth: 1280, margin: "0 auto",
+    }}>
+      <Reveal>
+        <div style={{
+          padding: "80px 60px",
+          border: `1px solid ${T.line}`, borderRadius: 24,
+          background: "linear-gradient(180deg, rgba(255,138,82,0.06), rgba(255,138,82,0.0))",
+          position: "relative", overflow: "hidden",
+        }}>
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "radial-gradient(ellipse at 50% 0%, rgba(255,138,82,0.12), transparent 60%)",
+            pointerEvents: "none",
+          }} />
+          <div style={{ position: "relative", textAlign: "center" }}>
+            <Eyebrow color={T.red}>Próximo passo</Eyebrow>
+            <h2 style={{
+              fontFamily: T.sans, fontWeight: 700,
+              fontSize: "clamp(40px, 6vw, 80px)",
+              lineHeight: 1.02, letterSpacing: "-0.04em",
+              color: T.fg, margin: "32px auto 24px", maxWidth: 880,
+            }}>
+              Você diz o domínio.<br/>
+              <Serif style={{ color: T.red, fontWeight: 400 }}>A gente faz o resto.</Serif>
             </h2>
-
-            <p className="text-zinc-400 mb-4 max-w-md mx-auto text-base leading-relaxed">
-              Esse serviço custa <span className="text-white font-bold">R$ 15.000 a R$ 25.000</span> no mercado. Enquanto a oferta estiver ativa, você acessa com IA, gratuitamente.
+            <p style={{
+              fontFamily: T.sans, fontSize: 17, color: T.fg2,
+              lineHeight: 1.6, maxWidth: 560, margin: "0 auto 40px",
+            }}>
+              Solicite o diagnóstico via WhatsApp. Em até 24h nossa equipe retorna
+              com o NDA, escopo e janela de execução. O relatório consolidado é
+              entregue na sequência.
             </p>
-
-            <p className="text-zinc-500 mb-10 max-w-md mx-auto text-sm leading-relaxed">
-              Você descobre onde está exposto. Seu responsável técnico recebe o relatório e corrige. Simples assim — antes que alguém de fora descubra primeiro.
-            </p>
-
-            <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(220, 38, 38, 0.4)" }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => { setCurrentStep(1); setShowQuiz(true); }}
-              className="btn btn-primary px-12 py-5 rounded-2xl text-sm shimmer"
-            >
-              QUERO MINHA AUDITORIA GRATUITA <Shield className="w-4 h-4" />
-            </motion.button>
-
-            <p className="text-zinc-600 text-xs mt-6 uppercase tracking-widest">
-              Vagas limitadas · Oferta por tempo limitado
-            </p>
-          </div>
-        </motion.div>
-      </Section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-white/5 py-12 bg-surface-2/50">
-        <div className="max-w-[1280px] mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-3">
-            <Shield className="w-5 h-5 text-primary" />
-            <span className="font-black text-sm tracking-tighter text-white">Jazz Sec - Attacker</span>
-          </div>
-
-          <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest text-center">
-            © 2025 Jazz Automations · Segurança Ofensiva com IA
-          </p>
-
-          <div className="flex items-center gap-6">
-            {[Monitor, Lock, Zap].map((Icon, i) => (
-              <Icon key={i} className="w-4 h-4 text-zinc-700 hover:text-zinc-400 transition-colors cursor-pointer" />
-            ))}
+            <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 48 }}>
+              <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" style={{
+                padding: "18px 32px", borderRadius: 999,
+                background: T.red, color: T.bg, textDecoration: "none",
+                fontFamily: T.sans, fontWeight: 600, fontSize: 15,
+                display: "inline-flex", alignItems: "center", gap: 10,
+              }}>Solicitar pelo WhatsApp <span style={{ fontFamily: T.mono, fontSize: 12 }}>→</span></a>
+              <a href={LANDING} style={{
+                padding: "17px 32px", borderRadius: 999,
+                border: `1px solid ${T.lineHi}`, color: T.fg,
+                textDecoration: "none", background: "transparent",
+                fontFamily: T.sans, fontWeight: 500, fontSize: 15,
+              }}>Voltar à operação</a>
+            </div>
+            <div style={{
+              display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24,
+              maxWidth: 720, margin: "0 auto",
+              paddingTop: 40, borderTop: `1px solid ${T.line}`,
+            }}>
+              {[
+                { v: "<24h", l: "primeiro retorno" },
+                { v: "NDA", l: "antes do dado" },
+                { v: "Zero", l: "retenção pós" },
+                { v: "100%", l: "remoto" },
+              ].map(it => (
+                <div key={it.l}>
+                  <div style={{ fontFamily: T.sans, fontWeight: 700, fontSize: 22, color: T.fg, letterSpacing: "-0.025em" }}>{it.v}</div>
+                  <div style={{ fontFamily: T.mono, fontSize: 10, color: T.fg3, letterSpacing: "0.18em", textTransform: "uppercase", marginTop: 4 }}>{it.l}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </footer>
+      </Reveal>
+    </section>
+  );
+}
+
+// ── Footer ─────────────────────────────────────────────────────
+function Footer() {
+  return (
+    <footer style={{
+      position: "relative", zIndex: 1,
+      padding: "40px 32px",
+      borderTop: `1px solid ${T.line}`,
+      maxWidth: 1280, margin: "0 auto",
+      display: "flex", justifyContent: "space-between", alignItems: "center",
+      flexWrap: "wrap", gap: 16,
+    }}>
+      <a href={LANDING} style={{
+        display: "flex", alignItems: "center", gap: 10,
+        color: T.fg, textDecoration: "none",
+      }}>
+        <span style={{
+          width: 26, height: 26, borderRadius: 6,
+          border: `1px solid ${T.lineHi}`, display: "grid", placeItems: "center",
+          fontFamily: T.mono, fontSize: 11, fontWeight: 700,
+          background: "rgba(245,244,240,0.04)",
+        }}>JS</span>
+        <span style={{ fontFamily: T.sans, fontWeight: 700, fontSize: 14 }}>Jazz Sec · Attacker</span>
+      </a>
+      <div style={{ display: "flex", gap: 24 }}>
+        <a href={DEFENDER} style={{ fontFamily: T.sans, fontSize: 13, color: T.fg2, textDecoration: "none" }}>Defender</a>
+        <a href={LANDING} style={{ fontFamily: T.sans, fontSize: 13, color: T.fg2, textDecoration: "none" }}>Operação</a>
+        <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" style={{ fontFamily: T.sans, fontSize: 13, color: T.fg2, textDecoration: "none" }}>WhatsApp</a>
+      </div>
+      <Mono style={{ fontSize: 10, color: T.fg3, letterSpacing: "0.18em" }}>© 2026 JAZZ AUTOMATIONS</Mono>
+    </footer>
+  );
+}
+
+// ── Root ───────────────────────────────────────────────────────
+export default function App() {
+  const y = useScrollY();
+  return (
+    <div style={{
+      background: T.bg, minHeight: "100vh", color: T.fg,
+      fontFamily: T.sans, overflowX: "hidden",
+    }}>
+      <style>{`
+        @keyframes scanRoll{from{transform:translateX(0);}to{transform:translateX(-33.333%);}}
+        a{transition:opacity 200ms,color 200ms,background 200ms,border-color 200ms;}
+        a:hover{opacity:0.92;}
+      `}</style>
+      <Backdrop />
+      <Nav y={y} />
+      <Hero y={y} />
+      <ScanFeed />
+      <Objective />
+      <Scope />
+      <Methodology />
+      <Output />
+      <Custody />
+      <Request />
+      <Footer />
     </div>
-  )
+  );
 }
